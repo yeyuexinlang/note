@@ -84,46 +84,6 @@ signed main(void){
 
 ---
 
-# ST算法
-
-> ST算法通常用于求解 RMQ (Range-Minimum/Maximum Query, **区间最值问题**)  
-> ST(Sparse-Table)算法：是一种用于解决 RMQ 问题的高效算法，它基于动态规划的思想，通过预处理得到一个二维数组，从而在O(1)的时间复杂度内回答  RMQ 查询。
-
-## 模板(RMQ-max)
-
-```c++
-#include <bits/stdc++.h>
-using namespace std;
-const int N = 1e5+10;
-int n, m;
-int a[N], dp[N][40];
-void st_init(){
-    for(int i = 1; i <= n; i ++) dp[i][0] = a[i]; // 初始胡区间长度为1时的值
-    int p = log2(n); // 或者 p = (int)(log(double(n)) / log(2.0));
-    for(int k = 1; k <= p; k ++){ // 用dp[]递推计算区间
-        for(int s = 1; s + (1 << k) <= n + 1; s ++){
-            dp[s][k] = max(dp[s][k - 1], dp[s + (1 << (k - 1))][k - 1]); // 最大值
-        }
-    }
-}
-int st_query(int L, int R){
-    int k = log2(R - L + 1); // 或者 k = (int)(log(double(R - L + 1)) / log(2.0));
-    return max(dp[L][k], dp[R - (1 << k) + 1][k]); // 最大值
-}
-signed main(){
-    scanf("%d%d", &n, &m);
-    for(int i = 1; i <= n; i ++) scanf("%d", &a[i]);
-    st_init();
-    for(int i = 1; i <= m; i ++){
-        int L, R; scanf("%d%d", &L, &R);
-        printf("%d\n", st_query(L, R));
-    }
-    return 0;
-}
-```
-
----
-
 # 动态规划
 
 ## 区间dp
@@ -847,7 +807,91 @@ signed main(void){
 
 ---
 
+
+## ST算法
+
+> ST算法通常用于求解 RMQ (Range-Minimum/Maximum Query, **区间最值问题**)  
+> ST(Sparse-Table)算法：是一种用于解决 RMQ 问题的高效算法，它基于动态规划的思想，通过预处理得到一个二维数组，从而在O(1)的时间复杂度内回答  RMQ 查询。
+
+### 模板(RMQ-max)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define endl '\n'
+// #define int long long
+#define ll long long
+// 注：i^j 表示 i 的 j 次方
+
+/*
+注意数组长度，和是否需要开long long
+*/
+
+const int N = 1e5 + 10;
+int n, q;   // 原数组长度，询问区间次数
+int arr[N]; // 原数组
+int dp[N][40]; // dp[i][j]对应从索引索引 i 开始，长度为 2^j 区间内的最值
+
+// 初始化 st表
+void st_init(){
+    for(int i = 1; i <= n; i ++) dp[i][0] = arr[i];     // 初始化区间长度为 2^0 的值
+    int p = (int)log2(n);           // 计算最长允许区间长度，避免 2^j 越界
+    for(int k = 1; k <= p; k ++){   // 从低层向高层递推
+        for(int s = 1; s + (1 << k) <= n + 1; s ++){    // 遍历区间初始位置，避免越界
+            dp[s][k] = max(dp[s][k - 1], dp[s + (1 << (k - 1))][k - 1]); // 将低层两个区间最大值合并
+        }
+    }
+}
+
+// 获取区间的最大最小值
+int st_query(int lf, int rt){
+    int k = (int)log2(rt - lf + 1);                     // 计算最长允许区间长度
+    return max(dp[lf][k], dp[rt - (1 << k) + 1][k]);    // 所求区间最大值
+}
+
+// 向原数组尾部添加新元素，并更新可能被影响的区间最值
+void add_element(int value) {
+    arr[++ n] = value;  // 将新数据添加到数组末尾
+    // 更新 dp 数组
+    dp[n][0] = value;   // 初始化新元素的区间长度为 2^0 的值
+    int p = (int)log2(n);   // 计算当前允许的最大区间长度
+    for (int k = 1; k <= p; k++) {
+        int s = n - (1 << k) + 1;   // 计算新数据可能影响的起始位置
+        if (s > 0) {
+            dp[s][k] = max(dp[s][k - 1], dp[s + (1 << (k - 1))][k - 1]);
+        }
+    }
+}
+
+void solve(void){
+    cin >> n >> q;
+    st_init();
+    while(q --){
+        int lf, rt;
+        cin >> lf >> rt;
+        cout << st_query(lf, rt) << endl;
+    }
+}
+
+signed main(void){
+    ios::sync_with_stdio(false);
+    // cin.tie(0);
+    // cout.tie(0);
+    int t = 1;
+    // cin >> t;
+    while(t --){
+        solve();
+    }
+
+    return 0;
+}
+```
+
+---
+
 ## 归并树
+
+> 获取区间内大于或小于 x 的数量。
 
 ```c++
 #include <bits/stdc++.h>
@@ -929,17 +973,23 @@ signed main(void){
 
 ## 树状数组
 
-```c++
-int lowbit(int x){return x & -x;} // 获取二进制最后一个1后的数值，例如 110 -> 10 也就是6 -> 2
+> **求区间和。** 可以在 O(nlogn) 的时间构建树状数组， O(logn) 的时间更新指定节点数据和查询区间和。
 
+```c++
+const int N = 1e5 + 10;
+int lowbit(int x){return x & -x;} // 获取二进制最后一个1后的数值，例如 110 -> 10 也就是6 -> 2
+/*
+注意！！！
+tree需要从索引 1 开始，否则 inx += lowbit(inx); inx 会进入死循环
+*/
 int tree[N];
-void update(int x, int d){ // 更新元素a[x] += d;
-    while(x <= N){
-        tree[x] += d;
-        x += lowbit(x);
+void add(int inx, int val){ // 更新元素a[x] += d;
+    while(inx <= N){
+        tree[inx] += val;
+        inx += lowbit(inx);
     }
 }
-int sum(int x){ // 返回前缀和
+int get_pre(int x){ // 返回前缀和
     int ans = 0;
     while(x > 0){
         ans += tree[x];
@@ -947,11 +997,96 @@ int sum(int x){ // 返回前缀和
     }
     return ans;
 }
+int sum(int lf, int rt){ // 获取[lf, rt]的范围和
+    return get_pre(rt) - get_pre(lf - 1);
+}
 ```
 
 ---
 
 # 二分
+
+## 基础模板
+
+**模板一：**
+
+```c++
+int binarySearch(vector<int>& nums, int target){
+    // 返回所求元素是否在 nums 中出现，返回目标索引，否则返回 -1
+    if(nums.size() == 0){
+        return -1;
+    }
+    int lf = 0, rt = nums.size() - 1;
+    while(lf <= rt){
+        // Prevent (lf + rt) overflow
+        int mid = lf + (rt - lf) / 2; // or mid = lf + ((rt - lf) >> 1);
+        if(nums[mid] == target){ // 找到目标
+            return mid; // 返回目标的索引
+        }else if(nums[mid] < target){
+            lf = mid + 1; 
+        }else{
+            rt = mid - 1; 
+        }
+    }
+    // End Condition: lf > rt
+    return -1;
+}
+```
+
+**模板二：**
+
+```c++
+int binarySearch(vector<int>& nums, int target){
+    if(nums.size() == 0){
+        return -1;
+    }
+    int lf = 0, rt = nums.size();
+    while(lf < rt){
+        // Prevent (lf + rt) overflow
+        int mid = lf + (rt - lf) / 2; // or mid = lf + ((rt - lf) >> 1);
+        if(nums[mid] == target){
+            return mid; 
+        }else if(nums[mid] < target){
+            lf = mid + 1; 
+        }else{ 
+            rt = mid;
+        }
+    }
+    // Post-processing:
+    // End Condition: lf == rt
+    if(lf != nums.size() && nums[lf] == target) return lf;
+    return -1;
+}
+```
+
+**模板三：**
+
+```c++
+int binarySearch(vector<int>& nums, int target){
+    if (nums.size() == 0){
+        return -1;
+    }
+    int lf = 0, rt = nums.size() - 1;
+    while (lf + 1 < rt){
+        // Prevent (lf + rt) overflow
+        int mid = lf + (rt - lf) / 2; // or mid = lf + ((rt - lf) >> 1);
+        if (nums[mid] == target) {
+            return mid;
+        } else if (nums[mid] < target) {
+            lf = mid;
+        } else {
+            rt = mid;
+        }
+    }
+    // Post-processing:
+    // End Condition: lf + 1 == rt
+    if(nums[lf] == target) return lf;
+    if(nums[rt] == target) return rt;
+    return -1;
+}
+```
+
+---
 
 ## 实数二分
 
@@ -1379,6 +1514,7 @@ int main() {
 using namespace std;
 const int N = 1e6 + 5;
 int Next[N];
+int max_len = 0;
 void getNext(string p){ // 计算 Next[1]~Next[plen]
     Next[0] = 0; Next[1] = 0;
     for(int i = 1; i < p.size(); i ++){ // 把 i 的增长看成后缀的逐步扩展
@@ -1393,8 +1529,7 @@ void getNext(string p){ // 计算 Next[1]~Next[plen]
         }
     }
 }
-int kmp(string s, string p){ // 在 s 种找 p，return 最长匹配长度
-    int ans = 0;
+int kmp(string s, string p){ // 在 s 种找 p，返回匹配结果的起始位置
     int slen = s.size(), plen = p.size();
     int j = 0;
     for(int i = 0; i < slen; i ++){ // 匹配 s 和 p 的每个字符
@@ -1403,14 +1538,15 @@ int kmp(string s, string p){ // 在 s 种找 p，return 最长匹配长度
         }
         if(s[i] == p[i]){ // 当前位置的字符匹配
             j ++;   // 匹配
-            ans = max(ans, j);  // 更新最长匹配长度
+            max_len = max(max_len, j);  // 更新最长匹配长度
         }
         if(j == plen){
             // 这个匹配，在 s 种的起点是 i + 1 - plen，末尾是 i。
             // cout << "startIndex = " << endl;
-            return ans; // 最长匹配长度。
+            return i - plen + 1; // 返回起始位置
         }
     }
+    return -1; // 没有匹配结果
 }
 signed main(void){
     string s, t; cin >> s >> t;
@@ -1418,6 +1554,31 @@ signed main(void){
     cout << kmp(s, t);
 
     return 0;
+}
+```
+
+## 字符串最小表示
+
+```c++
+int minRepresentation(string s){
+    int n = s.size();
+    s += s; // 将字符串拼接成两倍长，方便处理循环位移
+    int i = 0, j = 1, k = 0; // i 和 j 是两个起始位置，k 是当前比较的字符数
+    while (i < n && j < n && k < n) {
+        if (s[i + k] == s[j + k]) {
+            k++; // 当前字符相等，继续比较下一个字符
+            continue;
+        }
+        if (s[i + k] > s[j + k]) {
+            i = i + k + 1; // i 的字典序更大，跳过当前比较
+        } else {                
+            j = j + k + 1; // j 的字典序更大，跳过当前比较
+        }
+        if (i == j) i ++; // 避免 i 和 j 重合
+        k = 0; // 重置比较的字符数
+        
+    }
+    return min(i, j); // 返回字典序最小的起始位置
 }
 ```
 
