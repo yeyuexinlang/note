@@ -89,13 +89,70 @@ public class try_ {
     public static void main(String[] args){
         // 创建集合
         ArrayList<String> arr = new ArrayList<String>();
+
         //添加元素
         arr.add("a");
         arr.add("b");
-        System.out.println(arr.toString());
+        arr.add("c");
+        arr.add("e");
+        System.out.println(">>>" + arr.toString());
+
+        System.out.println();
+
+        // 删除指定元素
+        System.out.println("remove:\"a\" \n>>>" + arr.remove("a"));
+        System.out.println(">>>" + arr.toString());
+
+        System.out.println();
+
+        // 删除指定索引的元素
+        System.out.println("remove index: 1 \n>>>" + arr.remove(1));
+        System.out.println(">>>" + arr.toString());
+
+        System.out.println();
+
+        // 修改指定索引元素
+        System.out.println("修改指定索引处的元素，返回修改的元素: 1,\"k\" \n>>>" + arr.set(1, "k"));
+        System.out.println(">>>" + arr.toString());
+
+        System.out.println();
+
+        // 获取指定索引元素
+        System.out.println("返回指定索引处的元素：1 \n>>>" + arr.get(1));
+        System.out.println(">>>" + arr.toString());
+
+        System.out.println();
+
+        // 获取元素数量
+        System.out.println("获取元素数量 \n>>>" + arr.size());
+        System.out.println(">>>" + arr.toString());
     }
 }
+
 /*
-[a, b]
+>>>[a, b, c, e]
+
+remove:"a" 
+>>>true
+>>>[b, c, e]
+
+remove index: 1 
+>>>c
+>>>[b, e]
+
+修改指定索引处的元素，返回修改的元素: 1,"k" 
+>>>e
+>>>[b, k]
+
+返回指定索引处的元素：1 
+>>>k
+>>>[b, k]
+
+获取元素数量 
+>>>2
+>>>[b, k]
 */
+
+
+
 ```

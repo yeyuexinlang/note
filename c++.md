@@ -82,6 +82,28 @@ signed main(void){
 5. 利用数字的比较去替代字符串比较，可以大大减少复杂度  
 >注：出现哈希碰撞就换base。
 
+## template
+
+```c++
+#define ull unsigned long long
+const int N = 1e6 + 10;
+ull p[N], h[N]; // p[i] = P^i, h[i] = s[1~i]的hash值
+string s;
+// s = " " + s; // s 从1开始计算
+
+void init(int n){
+    p[0] = 1, h[0] = 0;
+    for(int i = 1; i <= n; i ++){
+        p[i] = p[i - 1] * P;
+        h[i] = h[i - 1] * P + s[i];
+    }
+}
+ull get(int lf, int rt){ // 计算s[lf~rt]的hash值
+    return h[rt] - h[lf - 1] * p[rt - lf + 1];
+}
+
+```
+
 ---
 
 # 动态规划
@@ -674,7 +696,7 @@ void init(){
 int getFa(int a){ 
     if(a == arr[a]) return a; // 如果该节点指向自己
     //return getFa(arr[a]);
-    return a = getFa(arr[a]);// 建森林
+    return arr[a] = getFa(arr[a]);// 建森林
 }
 void Union(int x, int y){
     int X = getFa(x), Y = getFa(y); // 获取父节点
@@ -695,11 +717,284 @@ void solve(){
 
 }
 ```
+
+---
+
+# 最小生成树（MST）
+
+> 最小生成树(Minimum Spanning Tree, 简称 $MST$ )，是指在一个连通的无向图中，包含图中所有顶点的一颗树，且该树的所有边的权重之和最小。
+
+## 性质
+
+- **连通性**：最小生成树必定包含图中所有顶点，并且通过边将它们连接起来，确保整个图是连通的，即任意两个两点之间都有唯一一条路径。
+- **无环**：最小生成树是一颗树，所以不能包含任何环。（一颗有 $n$ 个顶点的图中有且仅有 $n - 1$ 条边）
+- **最小权重**：最小生成树的所有边的权重之和为所有生成树中最小。
+- **最小生成树不唯一**：可能存在多个生成树为最小生成树，但最小生成树的权重和唯一。
+
+## Prim(普利姆)算法
+
+### 朴素 Prim 算法
+
+>时间复杂度 $O(n^2)$
+
+#### 算法步骤
+
+1. 选择一个起始节点作为最小生成树的起点。
+2. 将该起点节点加入最小生成树集合，并将其标记为已访问。
+3. 在所有与最小生成树集合相邻的边中，选择和它连接的权重最小的边。
+4. 将该边和所连节点加入最小生成树集合，并将该节点标记为已访问。
+5. 重复步骤3和步骤4，直到最小生成树包含了图中的所有节点。
+
+#### 代码实现
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+
+const int N = 510;
+int g[N][N], dist[N];   // 邻接矩阵，节点到生成树的连通部分的最短距离
+bool st[N]; // 是否已经连通
+int n, m;   // n 个节点, m 条边
+
+
+int Prim(){
+    int res = 0;    // 最小生成树的权重
+    memset(dist, 0x3f3f3f3f, sizeof dist); // 初始化所有节点到连通部分的距离为无穷大
+    dist[1] = 0;    // 从节点 1 开始
+    
+    for(int i = 0; i < n; i ++){    // 遍历所有节点
+        int t = -1;
+        // 找到还未加入集合的节点中距离最小的节点
+        for(int j = 1; j <= n; j ++){
+            if(!st[j] && (t == -1 || dist[t] > dist[j])) t = j;
+        }    
+        st[t] = true;   // 标记该节点已并入连通块
+        // 该节点不可到达，图非连通
+        if(dist[t] == 0x3f3f3f3f) return 0x3f3f3f3f;
+        res += dist[t]; // 将当前节点的距离累加到结果中
+        // 更新其他节点到集合的最小距离
+        for(int j = 1; j <= n; j ++){
+            dist[j] = min(dist[j], g[t][j]);
+        }
+    }
+    return res;
+}
+
+void solve(void){
+    memset(g, 0x3f3f3f3f, sizeof g); // 初始化所有边的权值为无穷大
+    cin >> n >> m;
+    for(int i = 0; i < m; i ++){
+        int u, v, w;
+        cin >> u >> v >> w;
+        g[u][v] = g[v][u] = min(g[u][v], w); // 更新边权
+    }
+    int t = Prim();
+    if(t == 0x3f3f3f3f){ // 图非连通，最小生成树不存在
+        cout << "None" << endl;
+        return;
+    }
+    cout << t << endl;
+}
+
+
+signed main(void){
+    int t = 1;
+    // cin >> t;
+    while(t --){
+        solve();
+    }
+
+    return 0;
+}
+```
+
+
+### 堆优化 Prim 算法
+
+> 时间复杂度：$O(mlogn)$
+
+#### 算法步骤
+
+1. 初始化 $dist$ 数组为 $INF$ ,表示所有节点到集合的距离为无穷大。
+2. 创建一个小根堆，堆中的元素为( $dist$ 值，节点编号)。
+3. 堆中点插入 $(0, 1)$ 表示节点 1 进入结合，$dist$ 值为 $0$。
+4. 每次从堆中取出 $dist$ 值最小的元素 $(d, u)$，将 $u$ 加入集合。
+5. 对 $u$ 相邻的所有节点 $v$ ，更新 $dist[v] = min(dist[v], g[u][v])$，并更新堆中的相应元素。
+6. 重复步骤4和步骤5，直到所有节点都加入集合。
+7. 最后根据取出的 $dist$ 值之和求出最小生成树的权重。
+
+#### 代码实现
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define pii pair<int, int>
+
+const int N = 510, M = 1e5 + 10;
+bool st[N]; // 标记节点是否已经加入最小生成树
+int n, m, dist[N]; // dist数组用于记录每个节点到最小生成树的距离
+int h[N], e[M], ne[M], idx, w[M]; // 邻接表存储图的边信息
+
+void add(int a, int b, int c)
+{
+    e[idx] = b; // 存储边的另一个节点
+    w[idx] = c; // 存储边的权值
+    ne[idx] = h[a]; // 将边插入到节点a的邻接表头部
+    h[a] = idx++; // 更新节点a的邻接表头指针
+}
+
+int Prim(){
+    int res = 0, cnt = 0; // res用于记录最小生成树的权值和，cnt用于记录已经选择的边数
+    priority_queue<pii, vector<pii>, greater<pii>> heap; // 最小堆，用于选择最短边
+    memset(dist, 0x3f, sizeof dist); // 初始化dist数组为无穷大
+    heap.push({ 0, 1 }); // 将节点1加入最小堆，距离为0
+    dist[1] = 0; // 节点1到最小生成树的距离为0
+
+    while (heap.size())
+    {
+        auto t = heap.top(); // 取出最小堆中距离最小的节点
+        heap.pop();
+        int ver = t.second, destination = t.first; // ver为节点，destination为距离
+        if (st[ver]) continue; // 如果节点已经在最小生成树中，跳过
+        st[ver] = true; // 将节点标记为已经加入最小生成树
+        res += destination; // 更新最小生成树的权值和
+        cnt++; // 增加已选择的边数
+
+        // 遍历节点ver的所有邻接边
+        for (int i = h[ver]; i != -1; i = ne[i])
+        {
+            auto u = e[i]; // 邻接边的另一个节点
+            if (dist[u] > w[i])
+            {
+                dist[u] = w[i]; // 更新节点u到最小生成树的距离
+                heap.push({ dist[u], u }); // 将节点u加入最小堆
+            }
+        }
+    }
+
+    // 如果最小生成树的边数小于n-1，则图不连通，返回0x3f3f3f3f表示不可达
+    if (cnt < n) return 0x3f3f3f3f;
+
+    return res; // 返回最小生成树的权值和
+}
+
+void solve(void){
+    memset(h, -1, sizeof h); // 初始化邻接表头指针为-1
+    cin >> n >> m; // 输入节点数和边数
+
+    for (int i = 0; i < m; ++i)
+    {
+        int a, b, c;
+        cin >> a >> b >> c;
+        add(a, b, c), add(b, a, c); // 添加无向图的边到邻接表中
+    }
+
+    int t = Prim(); // 计算最小生成树的权值和
+    if(t == 0x3f3f3f3f){ // 图非连通，最小生成树不存在
+        cout << "None" << endl;
+        return;
+    }
+    cout << t << endl;
+}
+
+
+signed main(void){
+    int t = 1;
+    // cin >> t;
+    while(t --){
+        solve();
+    }
+
+    return 0;
+}
+```
+
+## Kruskal(克鲁斯卡尔)算法
+
+> 时间复杂度: $O(mlogm)$
+
+### 算法步骤
+
+1. 创建一个空的最小生成树 $tree$。
+2. 将图中所有边按照权重从小到大排序。
+3. 从权重最小的边开始，判断其连接的连个节点是否在 $tree$ 中，若不在则加入。
+4. 重复步骤 $3$ 直到所有点都包含在 $tree$ 中。
+
+### 代码实现
+
+```c++
+struct edge{
+    int a, b, val;  // a 节点，b 节点， 边的权重
+    edge():a(0), b(0), val(0){}
+    edge(int _a, int _b, int _val): a(_a), b(_b), val(_val){}
+    bool operator<(const edge &nxt)const{
+        return val < nxt.val;
+    }
+};
+
+int n, m;   // 节点数，边数
+vector<edge> Edge;  // 边集
+vector<int> tree;    // 并查集，最小生成树 MST
+
+void init(){
+    cin >> n >> m;
+    Edge.resize(m);
+    tree.resize(n + 1, 0);
+    for(int i = 0; i < m; i ++){    // 初始化边
+        cin >> Edge[i].a >> Edge[i].b >> Edge[i].val;
+    }
+    for(int i = 1; i <= n; i ++){   // 初始化并查集
+        tree[i] = i;
+    }
+}
+
+int getFa(int x){   // 获得其父亲节点(建森林，路径压缩)
+    if(tree[x] == x) return x;
+    return tree[x] = getFa(tree[x]);
+}
+
+void Union(int x, int y){ // 将连个节点连接
+    int X = getFa(x), Y = getFa(y);
+    if(X == Y) return;
+    tree[X] = Y;
+}
+
+int kruskal(){
+    sort(Edge.begin(), Edge.end());
+    int res = 0;    // 最小生成树的权重
+    int cnt = 0;    // 已连接边数
+    for(edge &it : Edge){
+        int A = getFa(it.a);
+        int B = getFa(it.b);
+        if(A == B) continue; // 两个节点在同一个连通分量中
+        cnt ++;
+        res += it.val;
+        Union(it.a, it.b);
+    }
+    if(cnt < n - 1){ // 无法构成最小生成树
+        return INT_MAX;
+    }
+    return res;
+}
+
+void solve(){
+    init();
+    int res = kruskal();
+    if(res == INT_MAX){
+        cout << "None" << endl;
+        return;
+    }
+    cout << res << endl;
+}
+```
+
 ---
 
 # 区间查询
 
 ## 线段树
+
+模板一
 
 ```c++
 #include <bits/stdc++.h>
@@ -741,7 +1036,7 @@ void emplace_tag(ll inx){ // 传递懒惰标记
     ll mid = tree[inx].lf + (tree[inx].rt - tree[inx].lf) / 2;
     add_tag(LfTree(inx), tag[inx]); // 传递给左子树
     add_tag(RtTree(inx), tag[inx]); // 传递给右子树
-    tag[inx] = 0; // 清楚自己的标记
+    tag[inx] = 0; // 清除自己的标记
 }
 
 void update(ll inx, ll lf, ll rt, ll val){ // 修改数据
@@ -801,6 +1096,127 @@ void solve(void){
 signed main(void){
     ios::sync_with_stdio(false);
     solve();
+    return 0;
+}
+```
+
+模板二
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+#define pii pair<int, int>
+#define get_lf(x) ((x) << 1)
+#define get_rt(x) ((x) << 1 | 1)
+const int N = (int)1e5 << 3;
+
+int tree[N] = {0};  // 线段树
+int lazy[N] = {0};  // 懒惰标记
+int n; // 数据个数
+vector<int> arr; // 基本数组
+
+void add_tag(int inx, int lf, int rt, int val){ // 添加懒惰标记
+    /*
+        inx : 指向当前线段树索引位置。
+        [lf, rt] : 线段树当前索引指代区间。
+        val : 添加的懒惰标记值。
+    */
+    lazy[inx] += val;
+    tree[inx] += (rt - lf + 1) * val;
+}
+
+void emplace_tag(int inx, int lf, int rt){  // 传递懒惰标记
+    /*
+        inx : 指向当前线段树索引位置。
+        [lf, rt] : 线段树当前索引指代区间。
+    */
+    if(!lazy[inx]) return;
+    int mid = lf + ((rt - lf) >> 1);
+    add_tag(get_lf(inx), lf, mid, lazy[inx]);
+    add_tag(get_rt(inx), mid + 1, rt, lazy[inx]);
+    lazy[inx] = 0;
+}
+
+void build_tree(int inx, int lf, int rt){ // 建树
+    /*
+        inx : 指向当前线段树索引位置。
+        [lf, rt] : 线段树当前索引指代区间。
+    */
+    if(lf == rt){
+        tree[inx] = arr[lf];
+        return;
+    }
+    int mid = lf + ((rt - lf) >> 1);
+    build_tree(get_lf(inx), lf, mid);
+    build_tree(get_rt(inx), mid + 1, rt);
+    tree[inx] = tree[get_lf(inx)] + tree[get_rt(inx)];
+}
+
+int query_sum(int inx, int lf, int rt, int q_lf, int q_rt){ // 区间和
+    /*
+        inx : 指向当前线段树索引位置。
+        [lf, rt] : 线段树当前索引指代区间。
+        [q_lf, q_rt] : 需求和区间。
+    */
+    emplace_tag(inx, lf, rt);
+    if(q_lf <= lf && rt <= q_rt){
+        return tree[inx];
+    }
+    int sum = 0;
+    int mid = lf + ((rt - lf) >> 1);
+    if(mid >= q_lf) sum += query_sum(get_lf(inx), lf, mid, q_lf, q_rt);
+    if(mid < q_rt) sum += query_sum(get_rt(inx), mid + 1, rt, q_lf, q_rt);
+    return sum;
+}
+
+void update(int inx, int lf, int rt, int t_lf, int t_rt, int val){ // 区间更新数据（加）
+    /*
+        inx : 指向当前线段树索引位置。
+        [lf, rt] : 线段树当前索引指代区间。
+        [q_lf, q_rt] : 需更新区间。
+        val : 更新值。
+    */
+    if(t_lf <= lf && rt <= t_rt){
+        add_tag(inx, lf, rt, val);
+        return; 
+    }
+    emplace_tag(inx, lf, rt);
+    int mid = lf + ((rt - lf) >> 1);
+    if(mid >= t_lf) update(get_lf(inx), lf, mid, t_lf, t_rt, val);
+    if(mid < t_rt) update(get_rt(inx), mid + 1, rt, t_lf, t_rt, val);
+    tree[inx] = tree[get_lf(inx)] + tree[get_rt(inx)];
+}
+
+
+void solve(){
+    int m;
+    cin >> n >> m;
+    arr.resize(n + 1);
+    for(int i = 1; i <= n; i ++){
+        cin >> arr[i];
+    }
+    build_tree(1, 1, n);
+    while(m --){
+        int op, lf, rt, val;
+        cin >> op >> lf >> rt;
+        if(op == 1){
+            cin >> val;
+            update(1, 1, n, lf, rt, val);
+        }else{
+            cout << query_sum(1, 1, n, lf, rt) << endl;
+        }
+    }
+}
+
+signed main(void){
+    ios::sync_with_stdio(false);
+    cin.tie(0), cout.tie(0);
+    int t = 1;
+    // cin >> t;
+    while(t --){
+        solve();
+    }
     return 0;
 }
 ```
@@ -973,7 +1389,7 @@ signed main(void){
 
 ## 树状数组
 
-> **求区间和。** 可以在 O(nlogn) 的时间构建树状数组， O(logn) 的时间更新指定节点数据和查询区间和。
+> **求区间和。** 可以在 $O(nlogn)$ 的时间构建树状数组， $O(logn)$ 的时间更新指定节点数据和查询区间和。
 
 ```c++
 const int N = 1e5 + 10;
@@ -1001,6 +1417,12 @@ int sum(int lf, int rt){ // 获取[lf, rt]的范围和
     return get_pre(rt) - get_pre(lf - 1);
 }
 ```
+
+### 求逆序对
+
+步骤：
+1. 离散化
+2. 
 
 ---
 
@@ -1503,9 +1925,71 @@ int main() {
 }    
 ```
 
+## 前缀函数
+
+定义 **$pi$** 为字符串 **$s$** 的前缀函数。
+**$pi$**: $if$ `s[0~i]` 子串有相等的真前缀与真后缀，$then$ `pi[i]` 等于其中最长的一组的长度。
+注：“真”代表非空。
+例如：$s = abceabcf$
+$pi[i]$ = {0, 0, 0, 0, 1, 2, 3, 0}
+
+## template
+
+朴素：$O(n^3)$
+
+```c++
+const int N = 1e5;
+int pi[N] = {0}; // s 索引从0开始
+for(int i = 1; i < len; i ++){  // 枚举子串结束位置位置，0跳过
+    for(int j = i; j > 0; j --){ // 枚举真前后缀区间长度
+        if(s.substr(0, j) == s.substr(i - j + 1, j)){
+            pi[i] = j;
+            break;
+        }
+    }
+}
+```
+
+优化一：$O(n^2)$
+
+相邻的前缀函数值最多增加1
+
+```c++
+const int N = 1e5;
+int pi[N] = {0};
+for(int i = 1; i < len; i ++){  // 枚举子串结束位置位置，0跳过
+    for(int j = pi[i - 1] + 1; j > 0; j --){
+        if(s.substr(0, j) == s.substr(i - j + 1, j)){
+            pi[i] = j;
+            break;
+        }
+    }
+}
+```
+
+优化二：$O(n)$
+
+`s[i + 1] == s[pi[i]]`
+
+```c++
+const int N = 1e5;
+int pi[N] = {0};
+for(int i = 1; i < len; i ++){
+    int j = pi[i - 1];
+    while(j > 0 && s[i] != s[j]){
+        j = pi[j - 1];
+    }
+    if(s[i] == s[j]){
+        j ++;
+        pi[i] = j;
+    }
+}
+```
+
+
 ## 字符串匹配-KMP
 
-> KMP算法是一种在任何情况下都能达到 O(n + m) 复杂度的算法。
+> KMP算法是一种在任何情况下都能达到 **$O(n + m)$** 复杂度的算法。
 
 ### template
 
@@ -1556,6 +2040,129 @@ signed main(void){
     return 0;
 }
 ```
+
+---
+
+## 字典树（前缀树）
+
+### template(指针)
+
+```c++
+struct TrieNode{    // 字典树的节点
+    vector<TrieNode*> nxt;  // 子节点
+    bool isWord;    // 是否是字符串结尾
+    TrieNode():nxt(26, nullptr), isWord(0){}    // 无参构造函数
+};
+
+struct TrieTree{    // 字典树
+    TrieNode* root; // 根节点
+    TrieTree():root(new TrieNode()){}   // 无参构造函数
+
+    void insert(string s){  // 向字典树种添加字符串
+        TrieNode* cur = root;   // 初始化光标
+        for(char c : s){
+            int inx = c - 'a';  // 获取将字母转换为 [0-25] 的数字
+            if(!cur->nxt[inx]){ // 如果为空，则向后追加
+                cur->nxt[inx] = new TrieNode();
+            }
+            cur = cur->nxt[inx];    // 光标向后移动
+        }
+        cur->isWord = true; // 该节点为字符串结尾
+    }
+    
+    bool search(string s){ // 查找是否存在完成字符串 s，要求完整字符串，非前缀
+        TrieNode* cur = root;
+        for(char c : s){
+            int inx = c - 'a';
+            if(!cur->nxt[inx]) return false;
+            cur = cur->nxt[inx];
+        }
+        return cur->isWord;
+    }
+    bool exist(string prefix){  // 查找是否存在前缀字符串 prefix
+        TrieNode* cur = root;
+        for(char c : prefix){
+            int inx = c - 'a';
+            if(!cur->nxt[inx]) return false;
+            cur = cur->nxt[inx];
+        }
+        return true;
+    }
+};
+```
+
+### template(数组)
+
+```c++
+const int N = 1e5 + 10;
+
+struct TrieTree{
+    int tree[N][26], id, isWord[N];
+    // tree:字典树    id:通过该编号来记录节点关系    isWord:是否是单词结尾 
+
+    void insert(string s){
+        int cur = 0;
+        for(char c : s){
+            int inx = c - 'a';
+            if(!tree[cur][inx]){
+                tree[cur][inx] = ++id;
+            }
+            cur = tree[cur][inx];
+        }
+        isWord[cur] = 1;
+    }
+
+    bool search(string s){
+        int cur = 0;
+        for(char c : s){
+            int inx = c - 'a';
+            if(!tree[cur][inx]) return false;
+            cur = tree[cur][inx];
+        }
+        return isWord[cur];
+    }
+};
+```
+
+
+> [leetcode2416. 字符串的前缀分数和](https://leetcode.cn/problems/sum-of-prefix-scores-of-strings/description/)
+
+```c++
+class Solution {
+public:
+    vector<int> sumPrefixScores(vector<string>& words) {
+        struct node{
+            node *son[26]{};
+            // vector<node*> son{26, nullptr};
+            int score = 0;
+        };
+        node *root = new node();
+        for(auto &word : words){
+            auto cur = root;
+            for(char ch : word){
+                ch -= 'a';
+                if(!cur->son[ch]){
+                    cur->son[ch] = new node();
+                }
+                cur = cur->son[ch];
+                cur->score ++;
+            }
+        }
+        int n = words.size();
+        vector<int> ans(n, 0);
+        for(int i = 0; i < n; i ++){
+            auto cur = root;
+            for(auto ch : words[i]){
+                cur = cur->son[ch - 'a'];
+                ans[i] += cur->score;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+---
 
 ## 字符串最小表示
 
@@ -1703,8 +2310,185 @@ signed main(void){
 }
 ```
 
+---
+
+# 单调栈
+
+```c++
+vector<int> pre_g(n); // 该元素 arr[i] 左侧最接近且严格大于自己的索引位置
+stack<int> st; // 单调栈
+for(int i = 0; i < n; i ++){
+    while(!st.empty() && arr[st.top()] <= arr[i]){  // 非空且栈顶小于等于自身
+        st.pop();
+    }
+    pre_g[i] = st.empty() ? -1 : st.top();
+    st.emplace(i);
+}
+```
+
+# 单调双端队列
+
+```c++
+vector<int> window_max(n);
+deque<int> deq;
+for(int i = 0; i < n; i ++){
+    while(!deq.empty() && arr[deq.back()] <= arr[i]){
+        deq.pop_back();
+    }
+    while(!deq.empty() && deq.front() <= i - k){
+        deq.pop_front();
+    }
+    deq.emplace(i);
+    window_max[i] = arr[deq.front()];
+}
+```
 
 ---
+
+# 筛法
+
+> 判断一个区间内有哪些质数。
+
+## 朴素筛
+
+```c++
+bool judge[maxn]; // 是否是非质数 true:非质数
+int prime[maxn], cnt = 0; // 存储发现的质数,质数的数量
+int getPrimes(int n){
+    for(int i = 2; i <= n; i ++){
+        if(!judge[i]){
+            prime[cnt ++] = i;
+        }
+        for(int j = i * i; j <= n; j += i){ // 将其的倍数标记非质数
+            judge[j] = true;
+        }
+    }
+    return cnt;
+}
+```
+
+## 埃式筛
+
+```c++
+bool judge[maxn]; // 是否是非质数 true:非质数
+int prime[maxn], cnt = 0; // 存储发现的质数,质数的数量
+int getPrimes(int n){
+    for(int i = 2; i <= n; i ++){
+        if(!judge[i]){
+            prime[cnt ++] = i;
+            for(int j = i * i; j <= n; j += i){ // 将其的倍数标记非质数，仅循环质数
+                judge[j] = true;
+            }
+        }
+    }
+    return cnt;
+}
+```
+
+## 线性筛
+
+时间复杂度：$O(n)$
+
+```c++
+bool judge[maxn];
+int prime[maxn], cnt = 0;
+int getPrimes(int n){
+    for(int i = 2; i <= n; i ++){
+        if(!judge[i]){
+            prime[cnt ++] = i;
+        }
+        for(int j = 0; prime[j] * i <= n; j ++){
+            judge[prime[j] * i] = true;
+            if(i % prime[j] == 0){
+                break;
+            }
+        }
+    }
+    return cnt;
+}
+```
+
+# 数论
+
+## 模算术
+
+\(a \bmod b = c\) 即 \(a = b \cdot k + c,(k \in Z)\)
+
+特别的，如果数 \(a\) 和数 \(b\) 关于 \(m\) 的模相等，记作 \(a \equiv b \pmod{m}\)
+
+### 可乐兑换
+
+> 给定 n 瓶可乐，将可乐喝完后会产生 n 个空瓶，若假定 m 个空瓶可以兑换一瓶新的可乐（可以向收货商再“借”若干空瓶，但需要归还同等数量的空瓶），确定能够兑换的总的可乐瓶数。注意，新兑换的可乐在喝完后会产生新的空瓶，这些空瓶也可以继续用来兑换可乐。
+> 按照上述假设，则共能够喝到的可乐瓶数为 **\[T = n + \left\lfloor\frac{n}{m - 1}\right\rfloor = \left\lfloor\frac{nm}{m - 1}\right\rfloor\]**  
+
+理解上述结果的关键是认识到 \((m - 1)\) 个空瓶等价于一瓶可乐，即使用 \((m - 1)\) 个空瓶，再向商家“借一个空瓶”，凑成 \(m\) 个空瓶，兑换得到一瓶可乐，将可乐喝完会产生一个空瓶，将此空瓶还给商家即可。
+
+公式 \( T = n + \left\lfloor \frac{n}{m-1} \right\rfloor = \left\lfloor \frac{nm}{m-1} \right\rfloor \)，可以通过数论中的代数变形和取整函数性质来推导。以下是详细证明过程：  
+
+1. **分解分子项**  
+   将右侧表达式的分子 \( nm \) 拆分为 \( n(m-1) + n \)，则：  
+   \[
+   \frac{nm}{m-1} = \frac{n(m-1) + n}{m-1} = n + \frac{n}{m-1}
+   \]  
+   因此右侧公式可改写为：  
+   \[
+   \left\lfloor \frac{nm}{m-1} \right\rfloor = \left\lfloor n + \frac{n}{m-1} \right\rfloor
+   \]  
+
+2. **利用取整函数的线性性质**  
+   对于任意整数 \( n \) 和实数 \( x \)，有：  
+   \[
+   \left\lfloor n + x \right\rfloor = n + \left\lfloor x \right\rfloor
+   \]  
+   此处 \( x = \frac{n}{m-1} \)，代入后得：  
+   \[
+   \left\lfloor n + \frac{n}{m-1} \right\rfloor = n + \left\lfloor \frac{n}{m-1} \right\rfloor
+   \]  
+   这正是左侧的表达式 \( T \)，故等式成立。  
+
+## 模运算规则
+
+**加法规则** : \((x + y) \bmod n = ((x \bmod n) + (y \bmod n)) \bmod n\)  
+
+**减法规则** : \((x - y) \bmod n = ((x \bmod n) - (y \bmod n)) \bmod n\)  
+
+**乘法规则** : \(xy \bmod n = (x \bmod n)(y \bmod n) \bmod n\)
+
+**乘方规则** : \(x ^ y \bmod n = (x \bmod n)^y \bmod n\)
+
+### 结论
+
+- 判断一个数是否能被 \(3\) 整除，只需要验证该整数各位数相加之和能否被 \(3\)整除即可。
+根据模运算规则，有同余式 $10 \equiv 1 \pmod{3}$成立，因此有$10^k \equiv 1 \pmod{3}$成立，则有：
+\[
+\begin{split}
+    (a_{k}a_{k-1} \cdots a_{2} a_{1} a_{0})_{10}&= a_{k}10^{k} + a_{k-1}k^{k-1} + \cdots + a_{1}10 + a_{0} \\
+    &\equiv a_{k} + a_{k-1} + \cdots + a_{1} + a_{0} \pmod{3}
+\end{split}
+\]
+
+- 同样的，检验一个整数能否被 \(9\) 整除，只需要检验该整数各位数相加之和能否被 \(9\) 整除即可。
+由于 \(10 \equiv 1 \pmod{9}\) 成立，因此有 $10^k \equiv 1 \pmod{9}$ 成立,则有
+\[
+\begin{split}
+    (a_{k}a_{k-1} \cdots a_{2} a_{1} a_{0})_{10}&= a_{k}10^{k} + a_{k-1}k^{k-1} + \cdots + a_{1}10 + a_{0} \\
+    &\equiv a_{k} + a_{k-1} + \cdots + a_{1} + a_{0} \pmod{9}
+\end{split}
+\]
+
+- 类似的因为 \(10 \equiv -1 \pmod{11}\)，有
+\[
+\begin{split}
+    (a_{k}a_{k-1} \cdots a_{2}a_{1}a_{0})_{10} &= a_{k}10^{k}+a_{k-1}10^{k-1}+ \cdots + a_{1}10+a_{0} \\
+    &\equiv a_{k}\left(-1\right)^{k} + a_{k-1}\left(-1\right)^{k-1}+ \cdots +a_{2} - a_{1} + a_{0} \pmod{11}
+\end{split}
+\]
+这表明\((a_{k}a_{k-1} \cdots a_{2}a_{1}a_{0})_{10}\) 能被 $11$ 整除的充要条件是对 $n$ 的各位数字交替相加减，所得到的整数 $a_{0}-a_{1}+a_{2}-\cdots+\left(-1\right)^{k}a^{k}$能被 $11$ 整除。
+
+## 模的逆元
+
+
+
 
 # 随记
 
@@ -2205,6 +2989,34 @@ int fastPow(int a, int n){ // a^n
         n >>= 1;
     }
     return ans;
+}
+
+int modPow(int a, int n, int mod){
+    int ans = 0;
+    while(n){
+        if(n & 1) ans = ans * a % mod;
+        a = a * a % mod;
+        n >>= 1;
+    }
+    return ans;
+}
+```
+
+或是
+
+```c++
+int fastPow(int a, int n){
+    if(n == 0) return 1;
+    int flag = fastPow(int a * a, n >> 1);
+    if(n & 1) flag *= a;
+    return flag;
+}
+
+int modPow(int a, int n, int mod){
+    if(n == 0) return 1;
+    int flag = modPow(int a * a % mod, n >> 1, mod);
+    if(n & 1) flag = flag * a % mod;
+    return flag;
 }
 ```
 
