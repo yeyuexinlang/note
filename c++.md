@@ -1,6 +1,6 @@
-# **STL**
+# STL
 
-## **list(双向链表)**
+## list(双向链表)
 
 ```c++
 //定义一个list 
@@ -64,7 +64,7 @@ signed main(void){
 
 ---
 
-# **字符串哈希**
+# 字符串哈希
 
 ## 性质
 
@@ -1641,7 +1641,7 @@ int main() {
 表示一个正则表达式对象。正则表达式对象可以用来存储和表示一个特定的正则表达式模式。
 
 - **.** ：匹配任意单个字符（换行符除外）。
-- **\[ ]** ：匹配方括号内的任意一个字符。例如，[abc] 匹配 'a'、'b' 或 'c'。
+- **$$ ]** ：匹配方括号内的任意一个字符。例如，[abc] 匹配 'a'、'b' 或 'c'。
 - **^** ：在方括号内使用时，表示取反。例如，[^abc] 匹配除 'a'、'b'、'c' 之外的任意字符。
 - **\d** ：匹配任意数字，等价于 [0-9]。
 - **\s** ：匹配任意空白字符，包括空格、制表符、换行符等。
@@ -2345,11 +2345,66 @@ for(int i = 0; i < n; i ++){
 
 ---
 
-# 筛法
+
+# 数论
+
+## 定理
+
+### 算数基本定理
+
+> **算数基本定理**($fundamental \; theorem \; of \; arithmetic$, 又称**唯一分解定理**，$unique \; factorization \; theorem$) —— 任意合数可以表示成有限个素数的乘积，而且在不考虑素数乘积顺序的情况下其表示方式唯一。
+
+### 费马小定理
+
+> **费马小定理**($Fermat's \; little \; theorem$)指出：给定任意**素数** **$p$**，对于**整数** **$a$**,如果 $1 \lt a \lt p$，有以下结论：
+> $$a^{p-1} \equiv 1 \pmod{p}$$
+
+
+### 裴蜀定理
+
+> 如果 $a$ 和 $b$ 是不全为 $0$ 的整数，则有整数 $x$、$y$，使得 **$ax + by = \gcd\left(a, b\right)$**。
+
+**推论**：
+
+1. 如果 $a$ 和 $b$ 是不全为 $0$ 的整数，$a$ 和 $b$ 互质，当且仅当存则存在整数 $x$、$y$，使$ax+by=1$。
+    - 若 $ax+by=1$，则 $a$ 和 $b$ 互质。
+2. 如果 $a$ 和 $b$ 是不全为 $0$ 的整数，并且 $ax + by = c$ 有整数解解，那么 $c$ 一定是 $\gcd\left(a,b\right)$ 的整数倍。
+    - 若 $c$ 不是 $\gcd\left(a,b\right)$ 的整数倍，那么 $ax + by = c$ 就没有整数解。
+3. $a$ 和 $b$ 两项的裴蜀定理，可以推广到多项的情况。
+    - 例如: $ax + by + cz + dp=\gcd\left(a,b,c,d\right) = s$
+
+**注**：如果 $ax + by = c$一旦有解，就意味着一定有无穷多组 $\left(x, y\right)$，都可以使得式子成立。0
+
+## 素数
+
+> 对于整数 $a \gt 1$，如果它只能被 $1$ 和自身整除，则称 $a$ 为**素数**（$prime \; number$，或称**质数**）。   
+> 对于大于 $1$ 的整数 $a$ 来说，如果 $a$ 不是素数，则称 $a$ 为**合数**（$composite \; number$）。  
+>   > 合数可以表示成素数的乘积，如果不考虑乘积的顺序，其表示方式是唯一的，此即算数基本定理。  
+
+### 素数判定
+
+> 可以通过**筛法**将所有的素数都筛选出来，后直接判断。也可以朴素的判断。
+
+**朴素判断**
+
+```c++
+bool isPrime(int a){
+    if(a <= 1) return false;
+    if(a == 2) return true;
+    if(!(a & 1)) return false;
+    int fac = (int)sqrt(a);
+    for(int i = 3; i <= fac; i += 2){
+        if(a % i == 0) return false;
+    }
+    return true;
+}
+```
+
+### 筛法
 
 > 判断一个区间内有哪些质数。
 
-## 朴素筛
+#### 朴素筛
 
 ```c++
 bool judge[maxn]; // 是否是非质数 true:非质数
@@ -2367,7 +2422,7 @@ int getPrimes(int n){
 }
 ```
 
-## 埃式筛
+#### 埃式筛
 
 ```c++
 bool judge[maxn]; // 是否是非质数 true:非质数
@@ -2385,9 +2440,9 @@ int getPrimes(int n){
 }
 ```
 
-## 线性筛
+#### 线性筛
 
-时间复杂度：$O(n)$
+> 时间复杂度：$O(n)$
 
 ```c++
 bool judge[maxn];
@@ -2408,82 +2463,244 @@ int getPrimes(int n){
 }
 ```
 
-# 数论
+### 素因子分解
+
+> 根据**算数基本定理**，任意合数都可以表示为素数的乘积形式，即给定合数 $c$，可以将其表示为以下形式。
+> $$c = p_{1}^{e_{1}} p_{2}^{e_{2}} \cdots p_{n}^{e_{n}}$$ 
+
+在生成素数序列后(通过筛法获取)，假设序列中最大的素数为 $p_{max}$，利用已有的素数，可以很容易得将小于等于 $p_{max} \times p_{max}$ 的数进行因式分解。
+
+```c++
+map<int, int> factors; // 记录每个素因子出现的次数
+for(int i = 0; i < cnt; i ++){ // cnt 表示通过筛法筛出的素数的个数
+    if(prime[i] * prime[i] > n) break;
+    while(n % prime[i] == 0){
+        n /= prime[i];
+        factors[primes[i]] ++;
+    }
+}
+```
+
+**合数 $c$ 总共有多少个不同的约数?**
+> 设 $\tau(c)$ 表示合数 $c$ 不同约数的个数，$e_{i}$ 表示合数 $c$ 的第 $i$ 项素因子的个数。可证明：
+> $$\tau\left(c\right) = \prod_{i=1}^{k}\left(e_{i} + 1\right) = \left(e_{1} + 1\right)\left(e_{2} + 1\right) \cdots \left(e_{k} + 1\right)$$
+> 类似地，设 $\sigma\left(c\right)$ 表示合数 $c$ 的所有不同约数的和，$p_{i}$表示合数 $c$ 的第 $i$ 项素因子，$e_{i}$表示合数 $c$ 的第 $i$ 项素因子的个数。可证明：
+> $$\sigma\left(c\right) = \prod_{i=1}^{k}\frac{p_{i}^{e_{i}+1}-1}{p_{i}-1} = \frac{p_{1}^{e_{1}+1}-1}{p_{1}-1} \times \frac{p_{2}^{e_{2}+1}-1}{p_{2}-1} \times \cdots \times \frac{p_{k-1}^{e_{k-1}+1}-1}{p_{k-1}-1} \times \frac{p_{k}^{e_{k}+1}-1}{p_{k}-1}$$
+
+可以根据素因子分解的结果进一步得到这些不同的约数。
+```c++
+vector<int> divisors = {1};     // 约数
+for(auto &[fac, cnt] : factors){    // fac:素因子   cnt:素因子的个数
+    int base = 1, countOfDivisors = divisors.size();    // 基数，当前约数的数量
+    for(int i = 1; i <= cnt; i ++){
+        base *= fac;    // 更新基数
+        for(int j = 0; j < countOfDivisors;j ++){
+            divisors.emplace_back(divisors[j] * base);
+        }
+    }
+}
+// 排序并去重
+sort(divisors.begin(), divisors.end()); 
+divisors.erase(unique(divisors.begin(), divisors.end()), divisors.end());
+```
+
+## 整除性
+
+> 如果 $a$ 和 $b$ 为整数且 $a \neq 0$，**$a$ 整除($divides$) $b$** 是指存在整数 $c$ 使得 $b = ac$，如果 $a$ 整除 $b$，称 $a$ 是 $b$ 的一个因子，且称 $b$ 是 $a$ 的倍数，将其记为 **$a \mid b$**，如果 $a$ 不能整除 $b$，则将其记为 **$a \nmid b$**。
+
+### 最大公约数
+
+> 给定两个正整数 $a$ 和 $b$，$a$ 和 $b$ 的最大公约数($greatest \; common \; dividor$， 或称最大公因子)定义为能够同时整除 $a$ 和 $b$ 的最大正整数，记为 $gcd(a,b)$，有 $$gcd\left(a, b\right) = \max\left\{k, k\mid a 且 k \mid b\right\}$$
+
+#### 欧几里得算法（辗转相除法）
+$$
+\gcd(a, b) = 
+\begin{cases}
+a, & b = 0 \\
+\gcd \left(b, a \bmod b\right), & b \neq 0
+\end{cases}
+$$
+
+```c++
+int gcd(int a, int b){
+    if(a < b) swap(a, b);
+    return b ? gcd(b, a % b) : a;
+}
+```
+也可以使用头文件 \<algorithm> 中的内齿求最大公因数的函数`__gcd(a, b)`。
+
+### 互质
+
+> 如果正数 $a$ 和 $b$ 的最大公因数为 $1$，则称 $a$ 和 $b$ **互素($relative \; prime$，或称互质)**。
+
+- 显然两个素数的最大公约数为 $1$，有时两个非质数的最大公约数也可能为 $1$，如 $4$ 和 $9$。
+- 大于 $1$ 的两个自然数总是互质的。
+
+**互质的性质**
+设 $a \lt b$，则 $ka\left(1 \leq k \leq b\right)$ 除以 $b$ 的余数会取遍 $0 \sim b-1$ 且不会发生重复。
+例如： $5$ 和 $7$ 互为质数，则 $5k(1 \leq k \leq 7)$ 除以 $7$ 的余数依次为 $5$、$3$、$1$、$6$、$4$、$2$、$0$，取遍了 $0 \sim 6$ 的余数值。
+
+### 扩展欧几里得算法
+
+给出以下式子，求解一组整数数 $x$和$y$;
+$$ax + by = c \left(a, b, c \in \Zeta \right)$$
+
+根据**裴蜀定理**可以构造以下方程，且$\gcd\left(a, b\right) \mid c$。
+$$ax + by = \gcd\left(a, b\right)$$
+
+令 $a' = b$， $b' = a \; mod \; b$，有
+$$a'x' + b'y' = \gcd\left(a', b'\right) = gcd\left(b, a \; mod \; b\right)$$
+
+结合欧几里得算法中的等式
+$$\gcd\left(a, b\right) = \gcd\left(b, a \; mod \; b\right)$$
+
+可得到：
+$$
+\begin{split}
+ax + by &= a'x' + b'y' \\
+        &= bx' + \left(a \; mod \; b\right)y' \\
+        &= bx' + \left(a - \left\lfloor\frac{a}{b}\right\rfloor \cdot b\right)y' \\
+        &= bx' + ay' - \left\lfloor\frac{a}{b}\right\rfloor \cdot b \cdot y'
+\end{split}
+$$
+
+整理可得
+$$ax + by = ay' + b \left(x' - \left\lfloor\frac{a}{b}\right\rfloor \cdot y'\right)$$
+
+故可得到
+$$
+\begin{cases}
+x = y' \\
+y = x' - \left\lfloor\frac{a}{b}\right\rfloor \cdot y'
+\end{cases}
+$$
+
+不断运用欧几里得算法进行计算，直到 $\gcd\left(a', b'\right)$ 中 $b' = 0$，此时 $\gcd\left(a', 0\right) = a'$，故带入 $a'x' + b'y' = \gcd\left(a', b'\right)$ 可以得到 $x' = 1$，此时 $y'$ 可以取任意数，一般取 $y' = 0$。
+即当 $b' = 0$ 时 
+$$
+\begin{cases}
+x' = 1 \\
+y' = 0
+\end{cases}
+$$  
+
+通过不断地往回带入即可得最终解。
+
+```c++
+'''
+注：求出的是 ax + by = gcd(a, b) 的 x 和 y 非 ax + by = c;
+    因 gcd(a, b) | c 记得进行进行放缩。
+'''
+void extgcd(int a, int b, int &x, int &y){
+    if(b == 0){
+        x = 1, y = 0;
+        return;
+    }
+    extgcd(b, a % b, x, y);
+    int t = x - a / b * y;
+    x = y, y = t;
+}
+```
+
+对于不定方程 $ax + by = \gcd\left(a, b\right)$，扩展欧几里得算法求得的特解为 $\left(x', y'\right)$。其**通解**可表示为：
+$$
+x = x' + \left\lfloor\frac{b}{\gcd\left(a, b\right)}\right\rfloor \cdot k,\; y = y' - \left\lfloor\frac{a}{\gcd\left(a, b\right)}\right\rfloor \cdot k ,\; k \in \Zeta
+$$
+
+### 线性同余方程
+
+> 称形式类似于 
+**$$ax \equiv c \pmod{b}\left(a, b, c, x \in \Zeta \right)$$**
+>
+>的方程为**线性同余方程**(又称一次同余方程，因为在同余方程中，未知数的幂仅为一次)。
+
+显然当 $a = 0$ 时，只有 $c = 0$ 时，该线性同余方程才有解，此时任意整数 $x$ 均为其解。
+若 $a \neq 0$，则可将其转换为二元一次不定方程，进而使用*扩展欧几里得算法*解决。求解该同余方程等价于求解 
+$$ 
+ax + by = c \left(a, b, c, x, y \in \Zeta \right)
+$$
+
+根据*裴蜀定理*，只有当 $\gcd\left(a, b\right) \mid c$ 时，该不定方程才有解，且有 $\gcd\left(a, b\right)$ 个不同解。由*扩展欧几里得算法*求出不定方程的一个基本解 $x_{0}$ 后，则同余方程的所有模 $b$ 且互不同余的基本解 $x$ 可以表示为
+$$
+x = x_{0} + \left\lfloor\frac{b}{\gcd\left(a, b\right)}\right\rfloor \cdot t, \; t = 0, 1, \cdots, d-1
+$$
+
+---
 
 ## 模算术
 
-\(a \bmod b = c\) 即 \(a = b \cdot k + c,(k \in Z)\)
+$a \bmod b = c$ 即 $a = b \cdot k + c,(k \in Z)$
 
-特别的，如果数 \(a\) 和数 \(b\) 关于 \(m\) 的模相等，记作 \(a \equiv b \pmod{m}\)
+特别的，如果数 $a$ 和数 $b$ 关于 $m$ 的模相等，记作 $a \equiv b \pmod{m}$
 
 ### 可乐兑换
 
 > 给定 n 瓶可乐，将可乐喝完后会产生 n 个空瓶，若假定 m 个空瓶可以兑换一瓶新的可乐（可以向收货商再“借”若干空瓶，但需要归还同等数量的空瓶），确定能够兑换的总的可乐瓶数。注意，新兑换的可乐在喝完后会产生新的空瓶，这些空瓶也可以继续用来兑换可乐。
-> 按照上述假设，则共能够喝到的可乐瓶数为 **\[T = n + \left\lfloor\frac{n}{m - 1}\right\rfloor = \left\lfloor\frac{nm}{m - 1}\right\rfloor\]**  
+> 按照上述假设，则共能够喝到的可乐瓶数为 **$$T = n + \left\lfloor\frac{n}{m - 1}\right\rfloor = \left\lfloor\frac{nm}{m - 1}\right\rfloor$$**  
 
-理解上述结果的关键是认识到 \((m - 1)\) 个空瓶等价于一瓶可乐，即使用 \((m - 1)\) 个空瓶，再向商家“借一个空瓶”，凑成 \(m\) 个空瓶，兑换得到一瓶可乐，将可乐喝完会产生一个空瓶，将此空瓶还给商家即可。
+理解上述结果的关键是认识到 $(m - 1)$ 个空瓶等价于一瓶可乐，即使用 $(m - 1)$ 个空瓶，再向商家“借一个空瓶”，凑成 $m$ 个空瓶，兑换得到一瓶可乐，将可乐喝完会产生一个空瓶，将此空瓶还给商家即可。
 
-公式 \( T = n + \left\lfloor \frac{n}{m-1} \right\rfloor = \left\lfloor \frac{nm}{m-1} \right\rfloor \)，可以通过数论中的代数变形和取整函数性质来推导。以下是详细证明过程：  
+公式 $ T = n + \left\lfloor \frac{n}{m-1} \right\rfloor = \left\lfloor \frac{nm}{m-1} \right\rfloor $，可以通过数论中的代数变形和取整函数性质来推导。以下是详细证明过程：  
 
 1. **分解分子项**  
-   将右侧表达式的分子 \( nm \) 拆分为 \( n(m-1) + n \)，则：  
-   \[
+   将右侧表达式的分子 $ nm $ 拆分为 $ n(m-1) + n $，则：  
+   $$
    \frac{nm}{m-1} = \frac{n(m-1) + n}{m-1} = n + \frac{n}{m-1}
-   \]  
+   $$  
    因此右侧公式可改写为：  
-   \[
+   $$
    \left\lfloor \frac{nm}{m-1} \right\rfloor = \left\lfloor n + \frac{n}{m-1} \right\rfloor
-   \]  
+   $$  
 
 2. **利用取整函数的线性性质**  
-   对于任意整数 \( n \) 和实数 \( x \)，有：  
-   \[
+   对于任意整数 $ n $ 和实数 $ x $，有：  
+   $$
    \left\lfloor n + x \right\rfloor = n + \left\lfloor x \right\rfloor
-   \]  
-   此处 \( x = \frac{n}{m-1} \)，代入后得：  
-   \[
+   $$  
+   此处 $ x = \frac{n}{m-1} $，代入后得：  
+   $$
    \left\lfloor n + \frac{n}{m-1} \right\rfloor = n + \left\lfloor \frac{n}{m-1} \right\rfloor
-   \]  
-   这正是左侧的表达式 \( T \)，故等式成立。  
+   $$  
+   这正是左侧的表达式 $ T $，故等式成立。  
 
 ## 模运算规则
 
-**加法规则** : \((x + y) \bmod n = ((x \bmod n) + (y \bmod n)) \bmod n\)  
+**加法规则** : $(x + y) \bmod n = ((x \bmod n) + (y \bmod n)) \bmod n$  
 
-**减法规则** : \((x - y) \bmod n = ((x \bmod n) - (y \bmod n)) \bmod n\)  
+**减法规则** : $(x - y) \bmod n = ((x \bmod n) - (y \bmod n)) \bmod n$  
 
-**乘法规则** : \(xy \bmod n = (x \bmod n)(y \bmod n) \bmod n\)
+**乘法规则** : $xy \bmod n = (x \bmod n)(y \bmod n) \bmod n$
 
-**乘方规则** : \(x ^ y \bmod n = (x \bmod n)^y \bmod n\)
+**乘方规则** : $x ^ y \bmod n = (x \bmod n)^y \bmod n$
 
 ### 结论
 
-- 判断一个数是否能被 \(3\) 整除，只需要验证该整数各位数相加之和能否被 \(3\)整除即可。
+- 判断一个数是否能被 $3$ 整除，只需要验证该整数各位数相加之和能否被 $3$整除即可。
 根据模运算规则，有同余式 $10 \equiv 1 \pmod{3}$成立，因此有$10^k \equiv 1 \pmod{3}$成立，则有：
-\[
+$$
 \begin{split}
     (a_{k}a_{k-1} \cdots a_{2} a_{1} a_{0})_{10}&= a_{k}10^{k} + a_{k-1}k^{k-1} + \cdots + a_{1}10 + a_{0} \\
     &\equiv a_{k} + a_{k-1} + \cdots + a_{1} + a_{0} \pmod{3}
 \end{split}
-\]
+$$
 
-- 同样的，检验一个整数能否被 \(9\) 整除，只需要检验该整数各位数相加之和能否被 \(9\) 整除即可。
-由于 \(10 \equiv 1 \pmod{9}\) 成立，因此有 $10^k \equiv 1 \pmod{9}$ 成立,则有
-\[
+- 同样的，检验一个整数能否被 $9$ 整除，只需要检验该整数各位数相加之和能否被 $9$ 整除即可。
+由于 $10 \equiv 1 \pmod{9}$ 成立，因此有 $10^k \equiv 1 \pmod{9}$ 成立,则有
+$$
 \begin{split}
     (a_{k}a_{k-1} \cdots a_{2} a_{1} a_{0})_{10}&= a_{k}10^{k} + a_{k-1}k^{k-1} + \cdots + a_{1}10 + a_{0} \\
     &\equiv a_{k} + a_{k-1} + \cdots + a_{1} + a_{0} \pmod{9}
 \end{split}
-\]
+$$
 
-- 类似的因为 \(10 \equiv -1 \pmod{11}\)，有
-\[
+- 类似的因为 $10 \equiv -1 \pmod{11}$，有
+$$
 \begin{split}
     (a_{k}a_{k-1} \cdots a_{2}a_{1}a_{0})_{10} &= a_{k}10^{k}+a_{k-1}10^{k-1}+ \cdots + a_{1}10+a_{0} \\
     &\equiv a_{k}\left(-1\right)^{k} + a_{k-1}\left(-1\right)^{k-1}+ \cdots +a_{2} - a_{1} + a_{0} \pmod{11}
 \end{split}
-\]
-这表明\((a_{k}a_{k-1} \cdots a_{2}a_{1}a_{0})_{10}\) 能被 $11$ 整除的充要条件是对 $n$ 的各位数字交替相加减，所得到的整数 $a_{0}-a_{1}+a_{2}-\cdots+\left(-1\right)^{k}a^{k}$能被 $11$ 整除。
+$$
+这表明$(a_{k}a_{k-1} \cdots a_{2}a_{1}a_{0})_{10}$ 能被 $11$ 整除的充要条件是对 $n$ 的各位数字交替相加减，所得到的整数 $a_{0}-a_{1}+a_{2}-\cdots+\left(-1\right)^{k}a^{k}$能被 $11$ 整除。
 
 ## 模的逆元
 
@@ -3025,16 +3242,16 @@ int modPow(int a, int n, int mod){
 
 ## 整除分块
 
-> 对于给定的正整数 n ,  n = k * i + r (0 <= r < i)。当 i 在一定范围内变化时，\(\lfloor\frac{n}{i}\rfloor\)(向下取整)会有很多重复情况。例如：\(n = 10\) 时，\(\lfloor\frac{10}{1}\rfloor = 10\)，\(\lfloor\frac{10}{2}\rfloor = 5\)，\(\lfloor\frac{10}{3}\rfloor=\lfloor\frac{10}{4}\rfloor = 2\)，\(\lfloor\frac{10}{5}\rfloor = 2\)，\(\lfloor\frac{10}{6}\rfloor=\lfloor\frac{10}{7}\rfloor=\lfloor\frac{10}{8}\rfloor=\lfloor\frac{10}{9}\rfloor=\lfloor\frac{10}{10}\rfloor = 1\)。可以发现，\(\lfloor\frac{n}{i}\rfloor\) 的值会呈现出块状分布的特点，相同值的 \(i\) 会形成一个块。
+> 对于给定的正整数 n ,  n = k * i + r (0 <= r < i)。当 i 在一定范围内变化时，$\lfloor\frac{n}{i}\rfloor$(向下取整)会有很多重复情况。例如：$n = 10$ 时，$\lfloor\frac{10}{1}\rfloor = 10$，$\lfloor\frac{10}{2}\rfloor = 5$，$\lfloor\frac{10}{3}\rfloor=\lfloor\frac{10}{4}\rfloor = 2$，$\lfloor\frac{10}{5}\rfloor = 2$，$\lfloor\frac{10}{6}\rfloor=\lfloor\frac{10}{7}\rfloor=\lfloor\frac{10}{8}\rfloor=\lfloor\frac{10}{9}\rfloor=\lfloor\frac{10}{10}\rfloor = 1$。可以发现，$\lfloor\frac{n}{i}\rfloor$ 的值会呈现出块状分布的特点，相同值的 $i$ 会形成一个块。
 
 ### 算法实现
 
-- 假设要计算\(\sum_{i = 1}^{n}\lfloor\frac{n}{i}\rfloor\)，可以通过整除分块来优化计算。
-- 对于每个块，设块的左端点为 \(l\)，右端点为 \(r\)。当 \(i = l\) 时，\(\lfloor\frac{n}{l}\rfloor\) 的值确定，而该块的右端点 \(r\) 可以通过 \(r=\lfloor\frac{n}{\lfloor\frac{n}{l}\rfloor}\rfloor\) 计算得出。这样就可以在 \(O(\sqrt{n})\) 的时间复杂度内计算出上述求和式子的值。
+- 假设要计算$\sum_{i = 1}^{n}\lfloor\frac{n}{i}\rfloor$，可以通过整除分块来优化计算。
+- 对于每个块，设块的左端点为 $l$，右端点为 $r$。当 $i = l$ 时，$\lfloor\frac{n}{l}\rfloor$ 的值确定，而该块的右端点 $r$ 可以通过 $r=\lfloor\frac{n}{\lfloor\frac{n}{l}\rfloor}\rfloor$ 计算得出。这样就可以在 $O(\sqrt{n})$ 的时间复杂度内计算出上述求和式子的值。
 - 
 #### 公式
 
-\(r=\lfloor\frac{n}{\lfloor\frac{n}{l}\rfloor}\rfloor\)
+$r=\lfloor\frac{n}{\lfloor\frac{n}{l}\rfloor}\rfloor$
 
 ### 代码示例
 
