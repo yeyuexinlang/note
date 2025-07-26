@@ -2476,7 +2476,7 @@ for(int i = 0; i < cnt; i ++){ // cnt 表示通过筛法筛出的素数的个数
     if(prime[i] * prime[i] > n) break;
     while(n % prime[i] == 0){
         n /= prime[i];
-        factors[primes[i]] ++;
+        factors[prime[i]] ++;
     }
 }
 ```
