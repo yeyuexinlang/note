@@ -224,6 +224,85 @@ int dfs1(int pos,int sum,int islimit,int leadzero){
 }
 ```
 
+## Kadane's算法_最大连续子序列和算法
+
+> **$dp$**: 表示在当前位置结束的最大子数组和，初始值为数组的第一个元素。
+> **$maxSum$**: 表示全局最大子数组和，初始值也为数组的第一个元素。
+
+$$
+dp\left[i\right] = 
+\begin{cases}
+a\left[i\right] &i = 1\\
+\max \left(a\left[i\right], dp\left[i - 1\right] + a\left[i\right]\right) &1 < i \leq n
+\end{cases}
+$$
+$$
+maxSum = 
+\begin{cases}
+a\left[i\right] &i = 1\\
+\max \left(dp\left[i\right], maxSum\left[i - 1\right]\right) &1 < i \leq n
+\end{cases}
+$$
+
+### 非限定区间
+
+```c++
+void solve(void){
+    int n;
+    cin >> n;
+    vector<int> arr(n);
+    vector<int> dp(n);
+    int maxSum;
+    for(int i = 0; i < n; i ++){
+        cin >> arr[i];
+    }
+    maxSum = dp[0] = arr[0];
+    for(int i = 1; i < n; i ++){
+        dp[i] = max(arr[i], dp[i - 1] + arr[i]);
+        maxSum = max(maxSum, dp[i]);
+    }
+    cout << maxSum << endl;
+}
+```
+
+### 限定区间
+
+```c++
+void solve(void){
+    int n, k;
+    cin >> n >> k;
+    vector<int> arr(n);
+    vector<int> dp(n);
+    int maxSum;
+    for(int i = 0; i < n; i ++){
+        cin >> arr[i];
+    }
+    maxSum = dp[0] = arr[0];
+    int lf = 0, rt;
+    for(rt = 1; rt < n; rt ++){
+        dp[rt] = max(arr[rt], dp[rt - 1] + arr[rt]);
+        if(rt - lf + 1 <= k){
+            if(dp[rt] <= 0){
+                maxSum = max(maxSum, dp[rt]);
+                dp[rt] = 0;
+                lf = rt + 1;
+                continue;
+            }
+        }else{
+            dp[rt] -= arr[lf];
+            lf ++;
+            while(arr[lf] < 0 && lf < rt){
+                dp[rt] -= arr[lf];
+                lf ++;
+            }
+        }
+        maxSum = max(maxSum, dp[rt]);
+    }
+    cout << maxSum << endl;
+}
+```
+
+
 ---
 
 # BFS  
