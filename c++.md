@@ -2706,6 +2706,69 @@ $$
 
 
 
+## 第二类斯特林数
+
+> **题目描述**
+> Hz 刚刚学完排列组合，他忍不住开始思考一个很简单的问题：
+> 如果将 $n$ 个不同的小球放入到 $m$ 个不同的盒子中，而且保证每个盒子都不为空，合法的分配方案有多少种呢？ 
+> 现在请你回答这个问题，由于结果可能会很大，请你将结果 $mod$ $998244353998244353$ 后输出。  
+> **输入描述**:
+> 第一行给定两个整数 $n$，$m$ ($1≤n,m≤5000$)($1≤n,m≤5000$)，其含义如题面所述。  
+> **输出描述**:
+> 输出一个整数，表示合法方案数。
+> 
+> **示例1**
+>   > **输入**
+>   > 3 2
+>   > **输出**
+>   > 6
+> 
+> **示例2**
+>   > **输入**
+>   > 1000 1001
+>   > **输出**
+>   > 0
+
+```c++
+# include <bits/stdc++.h>
+using namespace std;
+#define int long long
+#define ll long long
+#define endl '\n'
+#define pii pair<int, int>
+
+const int MOD = 9'9824'4353;
+
+void solve(){
+    int n, m;
+    cin >> n >> m;
+    // 定义 dp[i][j] 表示将 i 个球，放入 j 个盒子的合法方案数
+    vector<vector<int> > dp(n + 1, vector<int> (m + 1, 0));
+    dp[0][0] = 1;
+    for(int i = 1; i <= n; i ++){
+        for(int j = 1; j <= m; j ++){
+            // 对于每个新球，可以选择放入已有的箱子中 dp[i - 1][j] * j (已放球的方案数*j个箱子可以放)；也可以放一个新的箱子重 dp[i - 1][j - 1] * j (已放球的方案数*j个新箱子可以选择)
+            dp[i][j] = (dp[i - 1][j] % MOD + dp[i - 1][j - 1] % MOD) * j % MOD;
+        }
+    }    
+    cout << dp[n][m] << endl;
+}
+
+signed main(void){
+    ios::sync_with_stdio(0);
+    //cin.tie(0); cout.tie(0);
+    int t = 1;
+    //cin >> t;
+    while(t--){
+        solve();
+    }
+    return 0;
+}
+```
+
+
+
+
 
 # 随记
 
