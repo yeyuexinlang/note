@@ -224,6 +224,85 @@ int dfs1(int pos,int sum,int islimit,int leadzero){
 }
 ```
 
+## Kadane's算法_最大连续子序列和算法
+
+> **$dp$**: 表示在当前位置结束的最大子数组和，初始值为数组的第一个元素。
+> **$maxSum$**: 表示全局最大子数组和，初始值也为数组的第一个元素。
+
+$$
+dp\left[i\right] = 
+\begin{cases}
+a\left[i\right] &i = 1\\
+\max \left(a\left[i\right], dp\left[i - 1\right] + a\left[i\right]\right) &1 < i \leq n
+\end{cases}
+$$
+$$
+maxSum = 
+\begin{cases}
+a\left[i\right] &i = 1\\
+\max \left(dp\left[i\right], maxSum\left[i - 1\right]\right) &1 < i \leq n
+\end{cases}
+$$
+
+### 非限定区间
+
+```c++
+void solve(void){
+    int n;
+    cin >> n;
+    vector<int> arr(n);
+    vector<int> dp(n);
+    int maxSum;
+    for(int i = 0; i < n; i ++){
+        cin >> arr[i];
+    }
+    maxSum = dp[0] = arr[0];
+    for(int i = 1; i < n; i ++){
+        dp[i] = max(arr[i], dp[i - 1] + arr[i]);
+        maxSum = max(maxSum, dp[i]);
+    }
+    cout << maxSum << endl;
+}
+```
+
+### 限定区间
+
+```c++
+void solve(void){
+    int n, k;
+    cin >> n >> k;
+    vector<int> arr(n);
+    vector<int> dp(n);
+    int maxSum;
+    for(int i = 0; i < n; i ++){
+        cin >> arr[i];
+    }
+    maxSum = dp[0] = arr[0];
+    int lf = 0, rt;
+    for(rt = 1; rt < n; rt ++){
+        dp[rt] = max(arr[rt], dp[rt - 1] + arr[rt]);
+        if(rt - lf + 1 <= k){
+            if(dp[rt] <= 0){
+                maxSum = max(maxSum, dp[rt]);
+                dp[rt] = 0;
+                lf = rt + 1;
+                continue;
+            }
+        }else{
+            dp[rt] -= arr[lf];
+            lf ++;
+            while(arr[lf] < 0 && lf < rt){
+                dp[rt] -= arr[lf];
+                lf ++;
+            }
+        }
+        maxSum = max(maxSum, dp[rt]);
+    }
+    cout << maxSum << endl;
+}
+```
+
+
 ---
 
 # BFS  
@@ -676,6 +755,37 @@ signed main(void){
     ios::sync_with_stdio(false);
     solve();
     return 0;
+}
+```
+
+## Floyd
+
+```c++
+const int INF = 0x13131313;
+
+void solve(void){
+    int n, m; // n 个节点，m 条边
+    cin >> n >> m;
+    vector<vector<int> > mat(n + 1, vector<int> (m, INF));  // 图
+    vector<vector<int> > path(n + 1, vector<int> (m, -1));  // 路径
+    for(int i = 0; i < m; i ++){
+        int u, v, w; cin >> u >> v >> w;
+        mat[u][v] = w;
+        path[u][v] = u;
+    }
+    vector<vector<int> > dis(mat.begin(), mat.end());   // 最短路径
+    
+    for(int k = 1; k <= n; k ++){
+        for(int i = 1; i <= n; i ++){
+            for(int j = 1; j <= n; j ++){
+                if(dis[i][k] + dis[k][j] < dis[i][j]){
+                    dis[i][j] = dis[i][k] + dis[k][j];
+                    path[i][j] = path[k][j];
+                }
+            }
+        }
+    }
+    
 }
 ```
 
@@ -2476,7 +2586,7 @@ for(int i = 0; i < cnt; i ++){ // cnt 表示通过筛法筛出的素数的个数
     if(prime[i] * prime[i] > n) break;
     while(n % prime[i] == 0){
         n /= prime[i];
-        factors[primes[i]] ++;
+        factors[prime[i]] ++;
     }
 }
 ```
@@ -2703,6 +2813,69 @@ $$
 这表明$(a_{k}a_{k-1} \cdots a_{2}a_{1}a_{0})_{10}$ 能被 $11$ 整除的充要条件是对 $n$ 的各位数字交替相加减，所得到的整数 $a_{0}-a_{1}+a_{2}-\cdots+\left(-1\right)^{k}a^{k}$能被 $11$ 整除。
 
 ## 模的逆元
+
+
+
+## 第二类斯特林数
+
+> **题目描述**
+> Hz 刚刚学完排列组合，他忍不住开始思考一个很简单的问题：
+> 如果将 $n$ 个不同的小球放入到 $m$ 个不同的盒子中，而且保证每个盒子都不为空，合法的分配方案有多少种呢？ 
+> 现在请你回答这个问题，由于结果可能会很大，请你将结果 $mod$ $998244353998244353$ 后输出。  
+> **输入描述**:
+> 第一行给定两个整数 $n$，$m$ ($1≤n,m≤5000$)($1≤n,m≤5000$)，其含义如题面所述。  
+> **输出描述**:
+> 输出一个整数，表示合法方案数。
+> 
+> **示例1**
+>   > **输入**
+>   > 3 2
+>   > **输出**
+>   > 6
+> 
+> **示例2**
+>   > **输入**
+>   > 1000 1001
+>   > **输出**
+>   > 0
+
+```c++
+# include <bits/stdc++.h>
+using namespace std;
+#define int long long
+#define ll long long
+#define endl '\n'
+#define pii pair<int, int>
+
+const int MOD = 9'9824'4353;
+
+void solve(){
+    int n, m;
+    cin >> n >> m;
+    // 定义 dp[i][j] 表示将 i 个球，放入 j 个盒子的合法方案数
+    vector<vector<int> > dp(n + 1, vector<int> (m + 1, 0));
+    dp[0][0] = 1;
+    for(int i = 1; i <= n; i ++){
+        for(int j = 1; j <= m; j ++){
+            // 对于每个新球，可以选择放入已有的箱子中 dp[i - 1][j] * j (已放球的方案数*j个箱子可以放)；也可以放一个新的箱子重 dp[i - 1][j - 1] * j (已放球的方案数*j个新箱子可以选择)
+            dp[i][j] = (dp[i - 1][j] % MOD + dp[i - 1][j - 1] % MOD) * j % MOD;
+        }
+    }    
+    cout << dp[n][m] << endl;
+}
+
+signed main(void){
+    ios::sync_with_stdio(0);
+    //cin.tie(0); cout.tie(0);
+    int t = 1;
+    //cin >> t;
+    while(t--){
+        solve();
+    }
+    return 0;
+}
+```
+
 
 
 
