@@ -758,6 +758,37 @@ signed main(void){
 }
 ```
 
+## Floyd
+
+```c++
+const int INF = 0x13131313;
+
+void solve(void){
+    int n, m; // n 个节点，m 条边
+    cin >> n >> m;
+    vector<vector<int> > mat(n + 1, vector<int> (m, INF));  // 图
+    vector<vector<int> > path(n + 1, vector<int> (m, -1));  // 路径
+    for(int i = 0; i < m; i ++){
+        int u, v, w; cin >> u >> v >> w;
+        mat[u][v] = w;
+        path[u][v] = u;
+    }
+    vector<vector<int> > dis(mat.begin(), mat.end());   // 最短路径
+    
+    for(int k = 1; k <= n; k ++){
+        for(int i = 1; i <= n; i ++){
+            for(int j = 1; j <= n; j ++){
+                if(dis[i][k] + dis[k][j] < dis[i][j]){
+                    dis[i][j] = dis[i][k] + dis[k][j];
+                    path[i][j] = path[k][j];
+                }
+            }
+        }
+    }
+    
+}
+```
+
 
 ---
 
