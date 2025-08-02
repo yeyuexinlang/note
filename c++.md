@@ -775,9 +775,9 @@ void solve(void){
     }
     vector<vector<int> > dis(mat.begin(), mat.end());   // 最短路径
     
-    for(int k = 1; k <= n; k ++){
-        for(int i = 1; i <= n; i ++){
-            for(int j = 1; j <= n; j ++){
+    for(int k = 1; k <= n; k ++){   // 中间节点
+        for(int i = 1; i <= n; i ++){   // 左端节点
+            for(int j = 1; j <= n; j ++){   // 右端节点
                 if(dis[i][k] + dis[k][j] < dis[i][j]){
                     dis[i][j] = dis[i][k] + dis[k][j];
                     path[i][j] = path[k][j];
