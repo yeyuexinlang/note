@@ -2814,6 +2814,51 @@ $$
 
 ## 模的逆元
 
+> **定义：**
+> 若存在正整数 $a$、$b$、$m$，满足 **$a \times b \equiv 1 \pmod{m}$**，则称 $b$ 为 $a$ 在模 $m$ 下的逆元，一般记作 **$a^{-1} \equiv b \pmod{m}$**。
+> 
+> **性质：** 
+> - **逆元是"相互"的:** 如果 $b$ 是 $a$ 的逆元，那么 $a$ 也是 $b$ 的逆元，即 **$b^{-1} \equiv a \pmod{m}$** 
+> - **把除法变乘法:** 若 **$a \times b \equiv 1 \pmod{m}$**，即 $b$ 为 $a$ 在模 $m$ 下的逆元，则 **$x \div a \pmod{m}$** 等价于 **$x \times b \pmod{m}$**。
+
+### **费马小定理法**
+
+根据费马小定理，对于任意素数 $p$，如果整数 $a$ 满足 $1 \lt a \lt p$，有 
+$$a^{-1} \equiv 1 \pmod{p}$$
+
+根据上述结论，有 $a^{p-1} \equiv a \times a^{p-2} \equiv 1 \pmod{p}$，则 **$a$ 的逆元为 $a^{p-2}$**。
+**注：$p$需是素数。**
+
+### **扩展欧几里得法**
+
+给定模数 $p$，求 $a$ 模 $p$ 的逆元相当于求解 **$ax \equiv 1\pmod{p}$**，该线性同余方程可转为求解不定方程 **$ax + ny = 1$**，可利用扩展欧几里得算法求解，并**将求解出的 $x_0$ 调整到区间$\left[0, n - 1\right]$** 即为所求逆元。
+若 $\gcd\left(a, n\right) \neq 1$，则 $a$ 模 $n$ 的逆元不存在。
+
+```c++
+void extgcd(int a, int b, int &x, int &y){
+    if(b == 0){
+        x = 1, y = 0;
+        return;
+    }
+    extgcd(b, a % b, x, y);
+    int t = x - a / b * y;
+    x = y, y = t;
+}
+
+int get_inv(int a, int p){
+    // ax = 1 (mod p)
+    if(gcd(a, p) != 1){
+        return -1; // 无逆元
+    }
+    int x, y;
+    extgcd(a, p, x, y);
+    if(x < 0){
+        x = (x % p + p) % p;
+    }
+    return x % p;
+}
+```
+
 
 
 ## 第二类斯特林数
