@@ -1,24 +1,7 @@
-
-**向下取整**
-`\lfloor\rfloor`
-
-$\lfloor{\frac{a+c}{b+d}}\rfloor$
-
+**自动调整括号大小**
 > 通过`\left\right`自动调整花括号大小
 > $\left\lfloor{\frac{a+c}{b+d}}\right\rfloor$
 
-**分数**
-`\frac{a}{b}`
-
-$\frac{a}{b}$
-
-
-**同余**
-`\pmod{n}`
-$\pmod{n}$
-
-`$a \equiv b \pmod{n}$`
-$a \equiv b \pmod{n}$
 
 **空格**
 
@@ -35,6 +18,8 @@ $a \equiv b \pmod{n}$
 | ------ | ---- | ---------- |
 | 乘号 | `\times` | `a \times b` -> $a \times b$ |
 | 点乘 | `\cdot` | `a \cdot b` -> $a \cdot b$ |
+| 除号 | `\div` | `a \div b` -> $a \div b$ |
+| 分数 | `\frac{}{}` | `\frac{a}{b}` -> $\frac{a}{b}$ |
 | 小于 | `<`或`\lt` | `a \lt b` -> $a \lt b$ |
 | 大于 | `>`或`\gt` | `a \gt b` -> $a \gt b$ |
 | 小于等于 | `\leq`或`\le` | `a \leq b` -> $a \leq b$ |
@@ -48,6 +33,7 @@ $a \equiv b \pmod{n}$
 | 整除 | `\mid` |`a \mid b` -> $a \mid b$ |
 | 不能整除 | `\nmid` |`a \nmid b` -> $a \nmid b$ |
 | 相似 | `\sim` | `a \sim b` -> $a \sim b$ |
+| 向下取整 | `\lfloor\rfloor` | `$\lfloor\frac{a}{b}\rfloor$` -> $\lfloor\frac{a}{b}\rfloor$ |
 
 **多行LaTeX公式对齐**
 
