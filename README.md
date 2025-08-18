@@ -1,37 +1,23 @@
-# note
+# 学习笔记仓库
 
-#### 介绍
-learning note
-
-#### 软件架构
-软件架构说明
+## 仓库介绍
+本仓库用于系统整理各类学习笔记，涵盖编程技术、开发工具、算法数据结构、操作系统等多个领域。内容以实用知识点、代码示例和操作指南为主，旨在为学习过程提供清晰的记录与便捷的查阅方式。
 
 
-#### 安装教程
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 使用说明
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+## 使用说明
+1. 直接浏览对应文件查看笔记内容（如 `c++.md` 查看C++相关笔记）
+2. 利用目录结构快速定位知识点
+3. 代码示例可直接复制使用，建议结合实际场景调试
 
 
-#### 特技
+## 参与贡献
+1. Fork 本仓库
+2. 新建 `Feat_xxx` 分支（如 `Feat_YourId`）
+3. 提交新增/修改的笔记内容（建议注明知识点分类）
+4. 发起 Pull Request 进行合并
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+
+## 说明
+- 笔记持续更新中，欢迎补充实用知识点
+- 若发现错误，可通过 Issues 反馈或直接提交修正
+- 内容以学习记录为主，如需引用请注明来源
