@@ -34,6 +34,8 @@
 | 不能整除 | `\nmid` |`a \nmid b` -> $a \nmid b$ |
 | 相似 | `\sim` | `a \sim b` -> $a \sim b$ |
 | 向下取整 | `\lfloor\rfloor` | `$\lfloor\frac{a}{b}\rfloor$` -> $\lfloor\frac{a}{b}\rfloor$ |
+| 无穷大 | `\infty` | `\infty` -> $\infty$ |
+| 右箭头 | `\to` | `\to` -> $\to$ |
 
 **多行LaTeX公式对齐**
 
