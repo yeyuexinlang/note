@@ -1,9 +1,9 @@
-**自动调整括号大小**
+### 自动调整括号大小
+
 > 通过`\left\right`自动调整花括号大小
 > $\left\lfloor{\frac{a+c}{b+d}}\right\rfloor$
 
-
-**空格**
+### 空格
 
 | 命令         | 宽度               | 示例（语法 → 效果）                     |
 |--------------|--------------------|----------------------------------------|
@@ -12,7 +12,6 @@
 | `\;`         | 大空格（约 `5/18 em`） | `a\;b` → $a\;b$                     |
 | `\quad`      | 标准空格（`1 em`） | `a\quad b` → $a\quad b$             |
 | `\qquad`     | 双倍空格（`2 em`） | `a\qquad b` → $a\qquad b$           |
-
 
 | 常用字符| 公式 | 实例 |
 | ------ | ---- | ---------- |
@@ -34,8 +33,10 @@
 | 不能整除 | `\nmid` |`a \nmid b` -> $a \nmid b$ |
 | 相似 | `\sim` | `a \sim b` -> $a \sim b$ |
 | 向下取整 | `\lfloor\rfloor` | `$\lfloor\frac{a}{b}\rfloor$` -> $\lfloor\frac{a}{b}\rfloor$ |
+| 无穷大 | `\infty` | `\infty` -> $\infty$ |
+| 右箭头 | `\to` | `\to` -> $\to$ |
 
-**多行LaTeX公式对齐**
+### 多行LaTeX公式对齐
 
 ```LaTeX
 $$
@@ -45,6 +46,7 @@ $$
 \end{split}
 $$
 ```
+
 $$
 \begin{split}
     (a_{k}a_{k-1} \cdots a_{2} a_{1} a_{0})_{10}&= a_{k}10^{k} + a_{k-1}k^{k-1} + \cdots + a_{1}10 + a_{0} \\
@@ -52,7 +54,7 @@ $$
 \end{split}
 $$
 
-**多项式**
+### 多项式
 
 ```LaTex
 $$
@@ -72,8 +74,8 @@ a, & b = 0 \\
 \end{cases}
 $$
 
-
 ### 大写希腊字母
+
 |希腊字母|LaTeX表示|示例代码（在数学模式下，如`$`包裹）|显示效果|
 | ---- | ---- | ---- | ---- |
 |$\Alpha$|`\Alpha`|`$\Alpha$`|$\Alpha$|
@@ -101,6 +103,7 @@ $$
 |$\Omega$|`\Omega`|`$\Omega$`|$\Omega$|
 
 ### 小写希腊字母
+
 |希腊字母|LaTeX表示|示例代码（在数学模式下，如`$`包裹）|显示效果|
 | ---- | ---- | ---- | ---- |
 |$\alpha$|`\alpha`|`$\alpha$`|$\alpha$|
@@ -125,4 +128,4 @@ $$
 |$\varphi$|`\varphi`|`$\varphi$`|$\varphi$|
 |$\chi$|`\chi`|`$\chi$`|$\chi$|
 |$\psi$|`\psi`|`$\psi$`|$\psi$|
-|$\omega$|`\omega`|`$\omega$`|$\omega$| 
+|$\omega$|`\omega`|`$\omega$`|$\omega$|
