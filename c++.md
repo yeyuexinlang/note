@@ -200,7 +200,7 @@ a\left[i\right] &i = 1\\
 \end{cases}
 $$
 $$
-maxSum = 
+maxSum =
 \begin{cases}
 a\left[i\right] &i = 1\\
 \max \left(dp\left[i\right], maxSum\left[i - 1\right]\right) &1 < i \leq n
@@ -742,7 +742,6 @@ void solve(void){
     
 }
 ```
-
 
 ---
 
@@ -2870,6 +2869,8 @@ signed main(void){
     return 0;
 }
 ```
+
+## 数学期望
 
 # 随记
 
